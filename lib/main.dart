@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 
 void main() {
   //for runnig calculator
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()));
+  //runApp(MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()));
+  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: SimpleCalc()));
 }
 
 class SimpleCalc extends StatefulWidget {
   const SimpleCalc({super.key});
+
   @override
   State<SimpleCalc> createState() => _SimpleCalcState();
 }
@@ -31,11 +33,17 @@ class _SimpleCalcState extends State<SimpleCalc> {
 
   String _compute(String s) {
     try {
+      // Replace UI symbols with valid ones
+      s = s.replaceAll('×', '*');
+      s = s.replaceAll('÷', '/');
+
+      // Convert percentages
       s = s.replaceAllMapped(RegExp(r'(\d+)%'), (match) {
         double value = double.parse(match.group(1)!);
         return (value / 100).toString();
       });
 
+      // Handle parentheses recursively
       while (s.contains('(')) {
         s = s.replaceAllMapped(RegExp(r'\(([^()]+)\)'), (match) {
           String innerExpr = match.group(1)!;
@@ -43,9 +51,10 @@ class _SimpleCalcState extends State<SimpleCalc> {
         });
       }
 
+      // Now handle + and -
       double total = 0;
       String current = "";
-      String op = "+"; // Current operator (+ or -)
+      String op = "+"; // current operator
 
       for (int i = 0; i < s.length; i++) {
         String c = s[i];
@@ -62,6 +71,7 @@ class _SimpleCalcState extends State<SimpleCalc> {
           current += c;
         }
       }
+
       if (current.isNotEmpty) {
         double part = _evalMulDiv(current);
         if (op == "+") {
@@ -83,33 +93,33 @@ class _SimpleCalcState extends State<SimpleCalc> {
 
   double _evalMulDiv(String s) {
     // Handle multiplication and division
-    double val = 0;
+    List<String> tokens = [];
     String current = "";
-    String op = "*";
 
     for (int i = 0; i < s.length; i++) {
       String c = s[i];
       if (c == "*" || c == "/") {
-        double part = double.parse(current);
-        if (op == "*") {
-          val *= part;
-        } else {
-          val /= part;
-        }
-        op = c;
+        tokens.add(current);
+        tokens.add(c);
         current = "";
       } else {
         current += c;
       }
     }
-    if (current.isNotEmpty) {
-      double part = double.parse(current);
+    tokens.add(current);
+
+    double val = double.parse(tokens[0]);
+    for (int i = 1; i < tokens.length; i += 2) {
+      String op = tokens[i];
+      double nextVal = double.parse(tokens[i + 1]);
+
       if (op == "*") {
-        val *= part;
-      } else {
-        val /= part;
+        val *= nextVal;
+      } else if (op == "/") {
+        val /= nextVal;
       }
     }
+
     return val;
   }
 
@@ -156,7 +166,7 @@ class _SimpleCalcState extends State<SimpleCalc> {
             ),
           ),
           const Divider(),
-          buttonRow('C', '+', '-', '%'), // blank in last slot
+          buttonRow('C', '+', '-', '%'),
           buttonRow('7', '8', '9', '×'),
           buttonRow('4', '5', '6', '/'),
           buttonRow('1', '2', '3', '('),
