@@ -1,18 +1,18 @@
-import 'package:flutter/material.dart';
-
+import 'package:caluclator/home_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MaterialApp(home: SimpleCalcNoGrid()));
+  //for runnig calculator
+  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: HomeScreen()));
 }
 
-class SimpleCalcNoGrid extends StatefulWidget {
-  const SimpleCalcNoGrid({super.key});
+class SimpleCalc extends StatefulWidget {
+  const SimpleCalc({super.key});
   @override
-  State<SimpleCalcNoGrid> createState() => _SimpleCalcNoGridState();
+  State<SimpleCalc> createState() => _SimpleCalcState();
 }
 
-class _SimpleCalcNoGridState extends State<SimpleCalcNoGrid> {
+class _SimpleCalcState extends State<SimpleCalc> {
   String expr = "";
   String result = "";
 
@@ -31,21 +31,18 @@ class _SimpleCalcNoGridState extends State<SimpleCalcNoGrid> {
 
   String _compute(String s) {
     try {
-      // Step 1: Handle percentages by converting them to decimals
       s = s.replaceAllMapped(RegExp(r'(\d+)%'), (match) {
         double value = double.parse(match.group(1)!);
         return (value / 100).toString();
       });
 
-      // Step 2: Evaluate parentheses by recursively evaluating inner expressions
       while (s.contains('(')) {
         s = s.replaceAllMapped(RegExp(r'\(([^()]+)\)'), (match) {
           String innerExpr = match.group(1)!;
-          return _compute(innerExpr); // Recursively compute inner expressions
+          return _compute(innerExpr);
         });
       }
 
-      // Step 3: Evaluate the expression without parentheses
       double total = 0;
       String current = "";
       String op = "+"; // Current operator (+ or -)
@@ -88,7 +85,7 @@ class _SimpleCalcNoGridState extends State<SimpleCalcNoGrid> {
     // Handle multiplication and division
     double val = 0;
     String current = "";
-    String op = "*"; // Start with multiplication
+    String op = "*";
 
     for (int i = 0; i < s.length; i++) {
       String c = s[i];
@@ -141,7 +138,7 @@ class _SimpleCalcNoGridState extends State<SimpleCalcNoGrid> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Simple Calc (No Grid)")),
+      appBar: AppBar(title: const Text("Calculator")),
       body: Column(
         children: [
           const SizedBox(height: 20),
